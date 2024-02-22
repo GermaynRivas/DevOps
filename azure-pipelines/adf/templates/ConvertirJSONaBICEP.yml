@@ -1,0 +1,21 @@
+parameters:
+- name: ResourceGroupName
+  type: string
+
+stages:
+- stage: ConvertirBICEP
+  displayName: "Convertir"
+  jobs:
+    - job: build
+      displayName: "Convertir Json a Bicep"
+      steps:
+      - task: AzurePowerShell@4
+        displayName: 'Convertir Json a Bicep'
+        inputs:
+          azureSubscription: "$(azureconection)"
+          scriptType: filePath
+          scriptPath: infrastructure-as-code/scripts/convertirjsonabicep.ps1
+          scriptArguments: >
+            -ResourceGroupName: ${{ parameters.ResourceGroupName }}
+          azurePowerShellVersion: 'OtherVersion'
+          preferredAzurePowerShellVersion: 5.5.0

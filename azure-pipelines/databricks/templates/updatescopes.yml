@@ -1,0 +1,48 @@
+parameters:
+- name: ResourceGroupName
+  type: string
+- name: dataLakeName
+  type: string
+- name: keyVaultName
+  type: string
+- name: dataFactoryName
+  type: string
+- name: secretBDSQL
+  type: string
+- name: secretServerSQL
+  type: string
+- name: secretHTTP
+  type: string
+- name: keyVaultNameDev
+  type: string
+- name: resourceGroupDev
+  type: string
+- name: dataLakeNameDev
+  type: string
+
+stages:
+- stage: Update_Secrets
+  displayName: "Update Secrets"
+  jobs:
+    - job: build
+      displayName: "Actualizar Secretos del Keyvault"
+      steps:
+      - task: AzurePowerShell@4
+        displayName: 'Actualizar Secretos ADBW'
+        inputs:
+          azureSubscription: "$(azureconection)"
+          scriptType: filePath
+          scriptPath: infrastructure-as-code/scripts/UpdateScopes.ps1
+          scriptArguments: >
+            -ResourceGroupName: ${{ parameters.ResourceGroupName }}
+            -dataLakeName: ${{ parameters.dataLakeName }}
+            -keyVaultName: ${{ parameters.keyVaultName }}
+            -dataFactoryName: ${{ parameters.dataFactoryName }}
+            -secretBDSQL: ${{ parameters.secretBDSQL }}
+            -secretServerSQL: ${{ parameters.secretServerSQL }}
+            -secretHTTP: ${{ parameters.secretHTTP }}
+            -keyVaultNameDev: ${{ parameters.keyVaultNameDev }}
+            -resourceGroupDev: ${{ parameters.resourceGroupDev }}
+            -dataLakeNameDev: ${{ parameters.dataLakeNameDev }}
+          azurePowerShellVersion: 'OtherVersion'
+          preferredAzurePowerShellVersion: 5.5.0

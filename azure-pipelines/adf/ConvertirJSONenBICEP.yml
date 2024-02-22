@@ -1,0 +1,18 @@
+# Sample YAML file to validate and export an ARM template into a build artifact
+# Requires a package.json file located in the target repository
+
+trigger:
+- none #- master
+
+
+variables:
+- template: ../lib/variable.environment.yml
+- group: dataops-iac-cd-output
+
+pool:
+  vmImage: "$(imagenso)"
+
+stages:
+- template: templates/ConvertirJSONaBICEP.yml
+  parameters:
+    ResourceGroupName: "$(resourceGroupCompute)"

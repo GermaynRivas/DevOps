@@ -1,0 +1,57 @@
+parameters:
+- name: environment
+  type: string
+- name: azureServiceConnection
+  type: string
+- name: iacCdVariableGroupPrefix
+  type: string
+
+stages:
+- stage: publish_static_artifacts_${{ parameters.environment }}
+  displayName: 'Deploy to ${{ parameters.environment }} Databricks'
+  jobs:
+  - deployment: publish_static_artifacts_${{ parameters.environment }}
+    displayName: 'Deploy to ${{ parameters.environment }} Databricks'
+    pool:
+      vmImage: "$(imagenso)"
+    environment: ${{ parameters.environment }}
+    variables:
+    - group:  ${{ parameters.iacCdVariableGroupPrefix }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          - task: AzureCLI@2
+            displayName: 'DBW URL'
+            inputs:
+                azureSubscription: "$(azureconection)"
+                scriptType: bash
+                scriptLocation: inlineScript
+                inlineScript: |
+                    az --version
+                    workspaceUrl=$(az resource show --resource-type Microsoft.Databricks/workspaces -g "$(resourceGroupCompute)" -n "$(databricksName)" --query properties.workspaceUrl --output tsv)
+                    echo "##vso[task.setvariable variable=URLDBW;]$workspaceUrl"
+                    echo "WorkspceURL: $workspaceUrl"
+                    databricks_resource_id="2ff814a6-3304-4ab8-85cb-cd0e6f879c1d"
+                    adbGlobalToken=$(az account get-access-token --resource 2ff814a6-3304-4ab8-85cb-cd0e6f879c1d --output json | jq -r .accessToken)
+                    echo "##vso[task.setvariable variable=DBW_TOKEN]$adbGlobalToken"
+                    echo "DbwToken: $adbGlobalToken"
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: data-platform/dbw
+              ArtifactName: 'databricks-${{ parameters.environment }}'
+            displayName: 'Publish Databricks Artifacts'
+          - template: ./databricks-setup-environment-template.yml
+            parameters:
+              azureServiceConnection: ${{ parameters.azureServiceConnection }}
+          - script: |
+              echo "Uploading notebooks at ${NOTEBOOKS_PATH} to workspace (${DATABRICKS_NOTEBOOK_PATH})..."
+              databricks workspace import_dir --overwrite "${NOTEBOOKS_PATH}" "${DATABRICKS_NOTEBOOK_PATH}"
+            env:
+              DATABRICKS_HOST: https://$(URLDBW)
+              DATABRICKS_TOKEN: $(DBW_TOKEN)
+              NOTEBOOKS_PATH: $(System.DefaultWorkingDirectory)/data-platform/dbw
+              DATABRICKS_NOTEBOOK_PATH: '/'
+            displayName: 'Deploy notebooks'

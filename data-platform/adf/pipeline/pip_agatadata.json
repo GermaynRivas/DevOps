@@ -1,0 +1,274 @@
+{
+	"name": "pip_agatadata",
+	"properties": {
+		"activities": [
+			{
+				"name": "lectura_csv",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "skAlumno",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "skAlumno",
+									"type": "String",
+									"physicalType": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "idAlumno",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "idAlumno",
+									"type": "String",
+									"physicalType": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "tipoDocumento",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "tipoDocumento",
+									"type": "String",
+									"physicalType": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "numeroDocumento",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "numeroDocumento",
+									"type": "String",
+									"physicalType": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "apellido1",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "apellido1",
+									"type": "String",
+									"physicalType": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "apellido2",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "apellido2",
+									"type": "String",
+									"physicalType": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "nombre1",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "nombre1",
+									"type": "String",
+									"physicalType": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "nombre2",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "nombre2",
+									"type": "String",
+									"physicalType": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "direccion",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "direccion",
+									"type": "String",
+									"physicalType": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "codMunicipio",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "codMunicipio",
+									"type": "String",
+									"physicalType": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "telefono",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "telefono",
+									"type": "String",
+									"physicalType": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "email",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "email",
+									"type": "String",
+									"physicalType": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "fechaNacimiento",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "fechaNacimiento",
+									"type": "String",
+									"physicalType": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "codMunicipioNac",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "codMunicipioNac",
+									"type": "String",
+									"physicalType": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "codGenero",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "codGenero",
+									"type": "String",
+									"physicalType": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "codEstrato",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "codEstrato",
+									"type": "String",
+									"physicalType": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "codSisben",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "codSisben",
+									"type": "String",
+									"physicalType": "String"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "datasetalumnos",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ds_dc_alumnos",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2022-07-22T02:22:11Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

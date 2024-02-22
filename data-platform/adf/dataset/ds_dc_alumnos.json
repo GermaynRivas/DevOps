@@ -1,0 +1,93 @@
+{
+	"name": "ds_dc_alumnos",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage2",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "Alumnos.csv",
+				"container": "bronce"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "skAlumno",
+				"type": "String"
+			},
+			{
+				"name": "idAlumno",
+				"type": "String"
+			},
+			{
+				"name": "tipoDocumento",
+				"type": "String"
+			},
+			{
+				"name": "numeroDocumento",
+				"type": "String"
+			},
+			{
+				"name": "apellido1",
+				"type": "String"
+			},
+			{
+				"name": "apellido2",
+				"type": "String"
+			},
+			{
+				"name": "nombre1",
+				"type": "String"
+			},
+			{
+				"name": "nombre2",
+				"type": "String"
+			},
+			{
+				"name": "direccion",
+				"type": "String"
+			},
+			{
+				"name": "codMunicipio",
+				"type": "String"
+			},
+			{
+				"name": "telefono",
+				"type": "String"
+			},
+			{
+				"name": "email",
+				"type": "String"
+			},
+			{
+				"name": "fechaNacimiento",
+				"type": "String"
+			},
+			{
+				"name": "codMunicipioNac",
+				"type": "String"
+			},
+			{
+				"name": "codGenero",
+				"type": "String"
+			},
+			{
+				"name": "codEstrato",
+				"type": "String"
+			},
+			{
+				"name": "codSisben",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

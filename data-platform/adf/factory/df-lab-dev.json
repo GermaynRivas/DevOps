@@ -1,0 +1,9 @@
+{
+	"name": "df-lab-dev",
+	"location": "eastus2",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "5a936743-4bee-4d07-83c1-b64e137d249d",
+		"tenantId": "4ccb8238-1021-4da4-aa51-a22343b307d3"
+	}
+}

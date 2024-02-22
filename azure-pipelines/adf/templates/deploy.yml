@@ -1,0 +1,69 @@
+parameters:
+  - name: environment
+    type: string
+  - name: iacCdVariableGroupPrefix
+    type: string
+  - name: pipelineArtifactDirectory
+    type: string
+
+stages:
+- stage: deploy_adf
+  dependsOn: build_adf
+  displayName: "Deploy Data Factory to subscription"
+  variables:
+  - group: ${{ parameters.iacCdVariableGroupPrefix }}
+  jobs:
+  - job: deploy
+    steps:
+    - task: AzureCLI@1
+      displayName: "SETUP: Set Azure Credentials"
+      inputs:
+        azureSubscription: '$(azureconection)'
+        scriptLocation: inlineScript
+        inlineScript: |
+          set -eu
+          subscriptionId=$(az account show --query id -o tsv)
+          echo "##vso[task.setvariable variable=SUBSCRIPTION_ID]$subscriptionId"
+        addSpnToEnvironment: true    
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        artifact: ArmTemplates
+        path: ${{ parameters.pipelineArtifactDirectory }}
+    - task: AzurePowerShell@4
+      displayName: 'Pre-deployment'
+      inputs:
+        azureSubscription: '$(azureconection)'
+        ScriptPath: '${{ parameters.pipelineArtifactDirectory }}/PrePostDeploymentScript.ps1'
+        ScriptArguments: '-predeployment $True -armTemplate "${{ parameters.pipelineArtifactDirectory }}/ARMTemplateForFactory.json" -ResourceGroupName "$(resourceGroupCompute)" -DataFactoryName "$(dataFactoryName)"'
+        azurePowerShellVersion: LatestVersion
+
+    - task: AzureResourceGroupDeployment@2
+      displayName: 'Deploy to Azure Subscription'
+      inputs:
+        azureSubscription: '$(azureconection)'
+        resourceGroupName: '$(resourceGroupCompute)'
+        location: '$(location)'
+        csmFile: '${{ parameters.pipelineArtifactDirectory }}/ARMTemplateForFactory.json'
+        csmParametersFile: '${{ parameters.pipelineArtifactDirectory }}/ARMTemplateParametersForFactory.json'
+        overrideParameters: 
+          -factoryName $(dataFactoryName)
+          -AzureKeyVaultAgata_properties_typeProperties_baseUrl "https://$(keyVaultName).vault.azure.net/"
+          -AzureBlobStorage2_properties_typeProperties_connectionString_secretName $(dataLakeName)
+          -AzureDataLakeAgatac1_properties_typeProperties_connectionString_secretName $(dataLakeNameDev)
+          #-LNK_fsdevsquadrow_properties_typeProperties_url "https://$(dataLakeName).dfs.core.windows.net"
+          #-MDLO_PREDICTIVO_properties_typeProperties_connectionString_secretName $(MLdataLakeName)
+          #-LNK_MDLO_PREDICTIVO_properties_typeProperties_connectionString_secretName $(secretServerSQL)
+          #-ESTUDIANTES_STG_properties_typeProperties_connectionString_secretName $(secretBDSQL)
+          #-LKHTTPPrueba_properties_typeProperties_userName $(secretHTTP)
+          #-AzureDatabricksLinkedService_properties_typeProperties_domain "https://$(databricksWorkspaceUrl)"
+          #-AzureDatabricksLinkedService_properties_typeProperties_existingClusterId "$(interactive-cluster)"
+          #-AzureDatabricksLinkedService_properties_typeProperties_workspaceResourceId "/subscriptions/$(SUBSCRIPTION_ID)/resourceGroups/$(resourceGroupCompute)/providers/Microsoft.Databricks/workspaces/$(databricksName)"
+          #-ADLSLinkedService_properties_typeProperties_url "https://$(dataLakeName).dfs.core.windows.net"
+        deploymentMode: Incremental
+    - task: AzurePowerShell@4
+      displayName: 'Post-deployment'
+      inputs:
+        azureSubscription: '$(azureconection)'
+        ScriptPath: '${{ parameters.pipelineArtifactDirectory }}/PrePostDeploymentScript.ps1'
+        ScriptArguments: '-predeployment $False -armTemplate "${{ parameters.pipelineArtifactDirectory }}/ARMTemplateForFactory.json" -ResourceGroupName "$(resourceGroupCompute)" -DataFactoryName "$(dataFactoryName)"'
+        azurePowerShellVersion: LatestVersion

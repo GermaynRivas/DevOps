@@ -1,0 +1,66 @@
+parameters:
+- name: iacCdVariableGroupPrefix
+  type: string
+- name: azureServiceConnection
+  type: string
+- name: resourceGroupName
+  type: string
+- name: location
+  type: string
+
+stages:
+  - stage: Deploy_Bicep_files
+    variables:
+    - group: '${{ parameters.iacCdVariableGroupPrefix }}'
+    jobs:
+    - job: Deploy
+      displayName: Deploy Bicep files
+      variables:
+        File: infrastructure-as-code/infrastructure/cluster.bicep
+      pool:
+        vmImage: $(imagenso)
+      steps:
+
+      - task: AzureCLI@2
+        name: BicepDeploy
+        inputs:
+          azureSubscription: ${{parameters.azureServiceConnection}}
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript:  |
+            set -e
+            deploymentOutput=$(az deployment group create \
+                                 --resource-group $(resourceGroupCompute) \
+                                 --template-file $(File) \
+                                 --parameters wsDatabricksName=$(databricksName))
+
+            echo $deploymentOutput | jq -c '.properties.outputs | to_entries[] | [.key, .value.value]' | 
+              while IFS=$"\n" read -r c; do
+                outputname=$(echo "$c" | jq -r '.[0]')
+                outputvalue=$(echo "$c" | jq -r '.[1]')
+                echo "##vso[task.setvariable variable=$outputname;isOutput=true]$outputvalue"
+              done
+
+    - job: deploy_dbw_clusters
+      displayName: Deploy DBW Clusters
+      dependsOn: Deploy
+      condition: succeeded('Deploy')
+      variables:
+        databricksWorkspaceUrl: $[ dependencies.Deploy.outputs['BicepDeploy.databricksWorkspaceUrl'] ]
+      steps:
+      - checkout: self
+      - template: step.install-databricks-cli.yml
+        parameters:
+          azureServiceConnection: ${{parameters.azureServiceConnection}}
+
+      - task: PowerShell@2
+        displayName: Deploy DBW Clusters
+        inputs:
+          pwsh: true
+          targetType: 'filePath'
+          filePath: infrastructure-as-code/scripts/DatabricksClusters.ps1
+          arguments: >
+                -DeploymentOutputFile "dbwOutput.json"
+        env:
+          DATABRICKS_HOST: https://$(databricksWorkspaceUrl) 
+          DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)

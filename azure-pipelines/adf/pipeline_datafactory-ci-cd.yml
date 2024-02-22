@@ -1,0 +1,43 @@
+# Sample YAML file to validate and export an ARM template into a build artifact
+# Requires a package.json file located in the target repository
+
+trigger:
+  branches:
+    include:
+    - none #- master
+  paths:
+    include:
+    - data-platform/adf
+
+variables:
+- template: ../lib/variable.environment.yml
+- group: dataops-iac-cd-output
+
+pool:
+  vmImage: "$(imagenso)"
+
+stages:
+- template: templates/ActSecretos.yml
+  parameters:
+    ResourceGroupName: "$(resourceGroupCompute)"
+    dataLakeName: "$(dataLakeName)"
+    keyVaultName: "$(keyVaultName)"
+    dataFactoryName: "$(dataFactoryName)"
+    secretBDSQL: "$(secretBDSQL)"
+    secretServerSQL: "$(secretServerSQL)"
+    secretHTTP: "$(secretHTTP)"
+    keyVaultNameDev: "$(keyVaultNameDev)"
+    resourceGroupDev: "$(resourceGroupDev)"
+    dataLakeNameDev: "$(dataLakeNameDev)"
+  
+- template: templates/build.yml
+  parameters:
+    environment: ${{variables.environment}}
+    iacCdVariableGroupPrefix: ${{variables.iacCdVariableGroupPrefix}}
+    workingDirectory: 'data-platform/adf'
+
+- template: templates/deploy.yml
+  parameters:
+    environment: ${{variables.environment}}
+    iacCdVariableGroupPrefix: ${{variables.iacCdVariableGroupPrefix}}
+    pipelineArtifactDirectory: $(System.DefaultWorkingDirectory)/_dataops-adf-cd

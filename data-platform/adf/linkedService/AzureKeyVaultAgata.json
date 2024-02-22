@@ -1,0 +1,11 @@
+{
+	"name": "AzureKeyVaultAgata",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://kvl-lab-dev.vault.azure.net/"
+		}
+	}
+}

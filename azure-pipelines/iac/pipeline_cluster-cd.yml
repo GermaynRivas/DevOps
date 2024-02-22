@@ -1,0 +1,20 @@
+trigger:
+  branches:
+    include:
+    - none
+  paths:
+    include:
+    - infrastructure-as-code/infrastructure/databricks-cluster
+    - infrastructure-as-code/infrastructure/modules-iac
+
+variables:
+  - template: ../lib/variable.environment.yml  
+  - group: dataops-iac-cd-output
+
+stages:
+- template: templates/stage.deploy.yml
+  parameters:
+    iacCdVariableGroupPrefix: ${{variables.iacCdVariableGroupPrefix}}
+    azureServiceConnection: "$(azureconection)"
+    resourceGroupName: "$(resourceGroupCompute)"
+    location: "$(zona)"

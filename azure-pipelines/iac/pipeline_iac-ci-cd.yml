@@ -1,0 +1,41 @@
+trigger:
+- none #master
+
+name: Deploy Bicep files
+
+variables:
+  - template: ../lib/variable.environment.yml
+  - group: dataops-iac-cd-output
+
+pool:
+  vmImage: "$(imagenso)"
+
+jobs:
+- job: Script_One
+  displayName: 'Contruyendo Recursos del Grupo de Recursos'
+  steps:
+  - task: AzureCLI@2
+    inputs:
+        azureSubscription: "$(azureconection)"
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+            az --version
+            az group create --name "$(resourceGroupCompute)" --location "$(zona)"
+            az deployment group create --resource-group "$(resourceGroupCompute)" --parameters "{\"accountDataLakeName\": {\"value\": \""$(dataLakeName)"\"},\"wsDatabricksName\": {\"value\": \""$(databricksName)"\"},\"dataFactoryName\": {\"value\": \""$(dataFactoryName)"\"},\"keyVaultName\": {\"value\": \""$(keyVaultName)"\"},\"accountName\": {\"value\": \""$(MLdataLakeName)"\"},\"applicationInsightsName\": {\"value\": \""$(applicationInsightsName)"\"},\"containerRegistryName\": {\"value\": \""$(containerRegistryName)"\"},\"machineLearningName\": {\"value\": \""$(machineLearningName)"\"},\"objectId\": {\"value\": \""$(objectId)"\"}}" --template-file "infrastructure-as-code/infrastructure/main.bicep"
+
+- job: Script_Two
+  displayName: "Creando Secretos de Recursos del Grupo de Recursos"
+  dependsOn: Script_One
+  variables:
+    azPowershellVersion: 5.5.0
+  steps:
+  - task: AzureCLI@2
+    inputs:
+        azureSubscription: "$(azureconection)"
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+            az --version
+            az group create --name "$(resourceGroupCompute)" --location "$(zona)"
+            az deployment group create --resource-group "$(resourceGroupCompute)" --parameters "{\"location\": {\"value\": \""$(zona)"\"},\"accountDataLakeName\": {\"value\": \""$(dataLakeName)"\"},\"wsDatabricksName\": {\"value\": \""$(databricksName)"\"},\"keyVaultName\": {\"value\": \""$(keyVaultName)"\"},\"DBW_TOKEN\": {\"value\": \"$( jq .accessToken -r <<<  " $(az account get-access-token --resource 2ff814a6-3304-4ab8-85cb-cd0e6f879c1d) " )\"}}" --template-file "infrastructure-as-code/infrastructure/secrets.bicep"

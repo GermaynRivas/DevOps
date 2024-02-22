@@ -1,0 +1,14 @@
+variables:
+  iacCdVariableGroupPrefix: 'dataops-iac-cd-output'
+  location: "$(zona)"
+  azureServiceConnection: "$(azureconection)"
+  solutionName: Lab-Devops-CI-CD
+  ${{ if eq(variables['Build.SourceBranchName'], 'main') }}:
+    environment: prod
+    branch: 'refs/heads/main'
+  ${{ if eq(variables['Build.SourceBranchName'], 'qa') }}:    
+    environment: qa
+    branch: 'refs/heads/qa'
+  ${{ if and(ne(variables['Build.SourceBranchName'], 'main'), ne(variables['Build.SourceBranchName'], 'qa')) }}:
+    environment: desarrollo
+    branch: 'refs/heads/develop'

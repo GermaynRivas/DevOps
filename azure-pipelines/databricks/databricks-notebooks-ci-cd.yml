@@ -1,0 +1,32 @@
+trigger:
+  branches:
+    include:
+      - develop
+
+  paths:
+    include:
+      - data-platform/dbw/*
+
+variables:
+- template: ../lib/variable.environment.yml
+- group: dataops-iac-cd-output
+
+stages:
+- template: templates/databricks-deploy-notebooks-job-template.yml
+  parameters:
+    environment: ${{variables.environment}}
+    azureServiceConnection: ${{variables.azureServiceConnection}}
+    iacCdVariableGroupPrefix: ${{variables.iacCdVariableGroupPrefix}}
+
+- template: templates/updatescopes.yml
+  parameters:
+    ResourceGroupName: "$(resourceGroupCompute)"
+    dataLakeName: "$(dataLakeName)"
+    keyVaultName: "$(keyVaultName)"
+    dataFactoryName: "$(dataFactoryName)"
+    secretBDSQL: "$(secretBDSQL)"
+    secretServerSQL: "$(secretServerSQL)"
+    secretHTTP: "$(secretHTTP)"
+    keyVaultNameDev: "$(keyVaultNameDev)"
+    resourceGroupDev: "$(resourceGroupDev)"
+    dataLakeNameDev: "$(dataLakeNameDev)"
